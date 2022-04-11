@@ -1,0 +1,145 @@
+---
+author: "Gabriel Hooks"
+date: "2022-04-10"
+title: "main.R"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+library(data.table)
+library(mice)
+library(bnstruct)
+library(ggplot2)
+
+aqi_cities <- data.frame(fread(file = "./data/AIR QUALITY INDEX-cities.csv", drop = "Rank"))
+aqi_countries <- data.frame(fread(file = "./data/AIR QUALITY INDEX-top countries.csv", drop = "Rank"))
+
+# Rename columns.
+colnames(aqi_cities) <- c("City", "X2021", "X2021Jan", "X2021Feb", "X2021Mar", 
+                          "X2021Apr", "X2021May", "X2021Jun", "X2021Jul", "X2021Aug",
+                          "X2021Sep", "X2021Oct", "X2021Nov", "X2021Dec", "X2020",
+                          "X2019", "X2018", "X2017")
+colnames(aqi_countries) <- c("Country.Region", "X2021", "X2020", "X2019", "X2018", "Pop")
+
+aqi_cities[, 3:18] <- sapply(aqi_cities[, 3:18], as.numeric)
+
+```
+
+## Diagnostics
+The missingPercentage function calculates the percentage of rows that contain NA
+values for each column and returns a data frame with that information.
+
+Some imputation methods like MICE may not be as effective or representative if
+there is a high percentage of NA values. If there are a lot of NAs, you may even
+be better off not imputing at all. This won't make the decision for you, but it 
+may help you decide what you should do regarding NA values.
+
+```{r diagnostics}
+
+missingPercentage <- function(x, col.range = 1:ncol(x)) {
+  mp <- data.frame(matrix(nrow = 1, ncol = length(col.range)))
+  
+  for(i in col.range) {
+    mp[1,i] <- sum(is.na(x[, i])) / nrow(x) * 100
+  }
+  
+  colnames(mp) <- colnames(x)
+  
+  return(mp)
+}
+
+missingPercentage(aqi_cities)
+
+```
+## Mean imputation
+The most basic form of imputation. Replaces NA values with the mean of that row
+(or range of columns within that row).
+
+```{r mean imputation}
+
+imputation.mean <- function(x, row.range = 1:nrow(x), col.range = 1:ncol(x)) {
+  imputed <- x
+  
+  for(r in row.range) {
+    for (c in col.range) {
+      if (is.na(x[r, c])) {
+        imputed[r, c] <- rowMeans(x[r, col.range], na.rm = TRUE)
+      }
+    }
+  }
+  
+  return(imputed)
+}
+
+test <- imputation.mean(aqi_cities, col.range = 3:14)
+
+```
+
+## MICE (Multivariate Imputations by Chained Equations)
+This uses the MICE algorithm to calculate imputations.
+
+There are mutliple methods that can be passed into the mice function. The default
+is 'pmm' (Predictive Mean Matching), which is a type of hot deck imputation method,
+but there are many others for other data types such as norm.predict, which uses 
+linear regression to predict NA values.
+
+https://www.rdocumentation.org/packages/mice/versions/3.14.0/topics/mice
+
+```{r MICE}
+imputation.mice <- function(x, mice.method = "pmm", mice.seed = NA, row.range = 1:nrow(x), col.range = 1:ncol(x)) {
+  imputed <- x
+  
+  temp_data <- mice(
+    imputed[row.range, col.range], 
+    m = 5,
+    maxit = 50, 
+    meth = mice.method, 
+    seed = mice.seed)
+
+  imputed[row.range, col.range] <- mice::complete(temp_data, 1)
+  
+  return(imputed)
+}
+
+test.mice <- imputation.mice(aqi_cities, col.range = 3:14)
+
+```
+
+## Testing
+After generating imputations, you can use these functions to generate conclusions
+about the new data. imputation.summary generates a summary containing mean, 
+median, and standard deviation for the original and the imputed data. 
+imputation.plot.comparison generates a plot with two density lines displaying
+the original and imputed data. 
+These two functions together can help you decide which imputation method performs
+best with the data set you're working on.
+
+```{r testing}
+
+imputation.summary <- function(original, imputed) {
+  imp_summary <- data.frame(
+    mean = c(original = mean(original, na.rm = TRUE), imputed = mean(imputed, na.rm = TRUE)),
+    median = c(original = median(original, na.rm = TRUE), imputed = median(imputed, na.rm = TRUE)),
+    sd = c(original = sd(original, na.rm = TRUE), imputed = sd(imputed, na.rm = TRUE))
+  )
+  
+  return(imp_summary)
+}
+
+imputation.summary(aqi_cities[, 3], test[, 3])
+imputation.summary(aqi_cities[, 3], test.mice[, 3])
+
+imputation.plot.comparison <- function(original, imputed, var) {
+  ggplot(mapping = aes_string(var)) +
+    geom_density(data = original, aes(color = "Original")) +
+    geom_density(data = imputed, aes(color = "Imputed")) +
+    scale_color_manual("",
+                       breaks = c("Original", "Imputed"),
+                       values = c("blue", "red"))
+    
+}
+
+imputation.plot.comparison(aqi_cities, test, "X2021Jan")
+imputation.plot.comparison(aqi_cities, test.mice, "X2021Jan")
+```
