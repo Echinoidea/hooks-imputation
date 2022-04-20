@@ -13,16 +13,20 @@ library(bnstruct)
 library(ggplot2)
 
 aqi_cities <- data.frame(fread(file = "./data/AIR QUALITY INDEX-cities.csv", drop = "Rank"))
-aqi_countries <- data.frame(fread(file = "./data/AIR QUALITY INDEX-top countries.csv", drop = "Rank"))
 
 # Rename columns.
 colnames(aqi_cities) <- c("City", "X2021", "X2021Jan", "X2021Feb", "X2021Mar", 
                           "X2021Apr", "X2021May", "X2021Jun", "X2021Jul", "X2021Aug",
                           "X2021Sep", "X2021Oct", "X2021Nov", "X2021Dec", "X2020",
                           "X2019", "X2018", "X2017")
-colnames(aqi_countries) <- c("Country.Region", "X2021", "X2020", "X2019", "X2018", "Pop")
 
 aqi_cities[, 3:18] <- sapply(aqi_cities[, 3:18], as.numeric)
+
+aqi_cities_t <- data.frame(t(aqi_cities))
+colnames(aqi_cities_t) <- aqi_cities_t[1,]
+aqi_cities_t <- aqi_cities_t[-1,]
+
+aqi_cities_t[,] <- sapply(aqi_cities_t[,], as.numeric)
 
 ```
 
@@ -52,19 +56,31 @@ missingPercentage <- function(x, col.range = 1:ncol(x)) {
 missingPercentage(aqi_cities)
 
 ```
+
 ## Mean imputation
 The most basic form of imputation. Replaces NA values with the mean of that row
 (or range of columns within that row).
 
 ```{r mean imputation}
 
-imputation.mean <- function(x, row.range = 1:nrow(x), col.range = 1:ncol(x)) {
+imputation.mean <- function(x, by.row = FALSE, row.range = 1:nrow(x), col.range = 1:ncol(x)) {
   imputed <- x
   
-  for(r in row.range) {
-    for (c in col.range) {
-      if (is.na(x[r, c])) {
-        imputed[r, c] <- rowMeans(x[r, col.range], na.rm = TRUE)
+  if (by.row) {
+    for(r in row.range) {
+      for (c in col.range) {
+        if (is.na(imputed[r, c])) {
+          imputed[r, c] <- rowMeans(x[r, col.range], na.rm = TRUE)
+        }
+      }
+    }
+  }
+  else {  # By column
+    for(c in col.range) {
+      for (r in row.range) {
+        if (is.na(imputed[r, c])) {
+          imputed[r, c] <- mean(x[row.range, c], na.rm = TRUE)
+        }
       }
     }
   }
@@ -102,7 +118,7 @@ imputation.mice <- function(x, mice.method = "pmm", mice.seed = NA, row.range = 
   return(imputed)
 }
 
-test.mice <- imputation.mice(aqi_cities, col.range = 3:14)
+#test.mice <- imputation.mice(aqi_cities, col.range = 3:14)
 
 ```
 
