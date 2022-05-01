@@ -4,7 +4,7 @@
 \alias{compareSummary}
 \title{Compare Summaries of Original vs. Imputed Data}
 \usage{
-compareSummary(original, imputed)
+compareSummary(original, imputed, by)
 }
 \arguments{
 \item{original}{The original, unimputed data object.}

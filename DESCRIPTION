@@ -3,11 +3,17 @@ Type: Package
 Title: Data Frame Imputation
 Version: 0.1.0
 Author: Gabriel Hooks
-Maintainer: gabrielhooks@usf.edu
+Maintainer: Gabriel Hooks <gabrielhooks@usf.edu>
 Description: Contains functions to diagnose data frame missing values, 
     various imputation methods streamlined for use in data frames, and functions
     to help the user decide which imputation method is best for the provided data.
-License: GNU
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.2
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+Imports: 
+    ggplot2,
+    mice

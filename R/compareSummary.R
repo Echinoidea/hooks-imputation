@@ -8,11 +8,11 @@
 #'
 #' @examples
 #' compareSummary(data, data_imputed)
-compareSummary <- function(original, imputed) {
+compareSummary <- function(original, imputed, by) {
   imp_summary <- data.frame(
-    mean = c(original = mean(original, na.rm = TRUE), imputed = mean(imputed, na.rm = TRUE)),
-    median = c(original = median(original, na.rm = TRUE), imputed = median(imputed, na.rm = TRUE)),
-    sd = c(original = sd(original, na.rm = TRUE), imputed = sd(imputed, na.rm = TRUE))
+    mean = c(original = mean(original[, by], na.rm = TRUE), imputed = mean(imputed[, by], na.rm = TRUE)),
+    median = c(original = median(original[, by], na.rm = TRUE), imputed = median(imputed[, by], na.rm = TRUE)),
+    sd = c(original = sd(original[, by], na.rm = TRUE), imputed = sd(imputed[,by], na.rm = TRUE))
   )
 
   return(imp_summary)

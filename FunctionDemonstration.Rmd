@@ -1,0 +1,52 @@
+---
+title: "HooksImputation Demo"
+output: html_notebook
+---
+
+```{r, Setup}
+data(aqi_cities)
+data(aqi_cities_imp)
+```
+
+## Get the percentage of values in each column that contain NA
+Data with varying amounts of missing data or different data patterns may call for
+different imputation methods. In some cases with lots of missing data, no 
+imputation should be done to prevent unrepresentative data and results.
+
+This function will return the percentage of missing elements in each column of x.
+
+```{r naPercentage}
+naPercentage(aqi_cities)
+```
+```{r, Original Data}
+head(aqi_cities)
+```
+
+This data set is layed out in such a way that imputation should be done row-wise,
+since a prediction on air quality in a given time period would not be affected by
+the air quality in different cities. Rather, I believe it would be more representative
+to predict a missing value based on air quality data from other reported times.
+
+```{r, Mean Imputation}
+head(imputationMean(aqi_cities, by.row = TRUE, col.range = 2:ncol(aqi_cities)))
+```
+```{r, Hot Deck Imputation}
+head(imputationHotDeck(aqi_cities, by.row = TRUE, col.range = 2:ncol(aqi_cities)))
+```
+```{r, MICE Imputation}
+# Using smaller subset of aqi_cities because mice is slow
+head(imputationMice(aqi_cities[1:10,], by.row = TRUE, col.range = 2:ncol(aqi_cities[1:10,]), printFlag = FALSE))
+```
+# aqi_cities_imp is aqi_cities imputed with mean values
+I use aqi_cities_imp in the next two comparison functions for demonstration.
+
+```{r, Compare Distributions}
+compareDistribution(aqi_cities, 
+                    aqi_cities_imp,
+                    by = "X2021Jan")
+```
+```{r, Compare Summary}
+compareSummary(aqi_cities, 
+               aqi_cities_imp,
+               by = "X2021Jan")
+```

@@ -15,7 +15,6 @@
 #'
 compareDistribution <- function(original, imputed, by) {
   require(ggplot2)
-
   ggplot(mapping = aes_string(by)) +
     geom_density(data = original, aes(color = "Original")) +
     geom_density(data = imputed, aes(color = "Imputed")) +
