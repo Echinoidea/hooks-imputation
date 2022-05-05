@@ -13,7 +13,15 @@
 #'
 #' @return Returns the passed data with missing values imputed with a random
 #' value from that element's column or row.
+#'
 #' @examples
+#' # Default by column
+#' imputed_mean <- imputationMean(data)
+#'
+#' # By row, excluding the first column.
+#' imputed_mean_byrow <- imputationMean(data_byrow,
+#' col.range = 2:ncol(data_byrow))
+#' @export
 imputationHotDeck <- function(x, by.row = FALSE, row.range = 1:nrow(x), col.range = 1:ncol(x)) {
   imputed <- x
 

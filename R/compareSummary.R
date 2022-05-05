@@ -8,6 +8,7 @@
 #'
 #' @examples
 #' compareSummary(data, data_imputed)
+#' @export
 compareSummary <- function(original, imputed, by) {
   imp_summary <- data.frame(
     mean = c(original = mean(original[, by], na.rm = TRUE), imputed = mean(imputed[, by], na.rm = TRUE)),

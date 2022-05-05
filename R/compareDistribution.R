@@ -13,6 +13,8 @@
 #' @examples
 #' compareDistribution(data, data_imputed, "values")
 #'
+#' @export
+#'
 compareDistribution <- function(original, imputed, by) {
   require(ggplot2)
   ggplot(mapping = aes_string(by)) +

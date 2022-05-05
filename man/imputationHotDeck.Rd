@@ -31,3 +31,11 @@ value from that element's column or row.
 Replace missing values with a randomly selected, non-NA value from that
 element's column or row.
 }
+\examples{
+# Default by column
+imputed_mean <- imputationMean(data)
+
+# By row, excluding the first column.
+imputed_mean_byrow <- imputationMean(data_byrow,
+col.range = 2:ncol(data_byrow))
+}

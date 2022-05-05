@@ -41,6 +41,7 @@
 #' imputed_data_byrow <- imputationMice(data_byrow, by.row = TRUE,
 #' col.range = 2:ncol(data_byrow))
 #'
+#' @export
 imputationMice <- function(data, by.row = FALSE, row.range = 1:nrow(data),
                            col.range = 1:ncol(data), mice.method = "pmm", m = 5,
                            mice.action = 1L, ...) {

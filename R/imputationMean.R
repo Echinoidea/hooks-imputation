@@ -20,6 +20,7 @@
 #' # By row, excluding the first column.
 #' imputed_mean_byrow <- imputationMean(data_byrow,
 #' col.range = 2:ncol(data_byrow))
+#' @export
 imputationMean <- function(x, by.row = FALSE, row.range = 1:nrow(x), col.range = 1:ncol(x)) {
   imputed <- x
 

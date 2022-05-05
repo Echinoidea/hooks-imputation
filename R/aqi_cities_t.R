@@ -7,4 +7,5 @@
 #' @format An object of class \code{"data.frame"}.
 #'
 #' @keywords datasets
+#' @export
 "aqi_cities_t"

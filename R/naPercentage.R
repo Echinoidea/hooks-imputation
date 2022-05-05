@@ -23,6 +23,7 @@
 #' # By row, excluding first column
 #' na_pct_byrow <- naPercentage(data_byrow, by.row = TRUE, col.range = 2:ncol(x))
 #'
+#' @export
 naPercentage <- function(x, by.row = FALSE, row.range = 1:nrow(x),
                                   col.range = 1:ncol(x)) {
   if (by.row) {
